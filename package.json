@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
-    "test:watch": "jest --watch",
+    "test:watch": "jest --watchAll",
     "db:start": "docker compose -f infra/compose.yml --env-file .env.development up -d --remove-orphans && node --env-file=.env.development infra/scripts/wait-for-postgres.js",
     "migrate:up": "pnpm db:start && node-pg-migrate -m migrations up",
     "migrate:down": "pnpm db:start && node-pg-migrate -m migrations down",
