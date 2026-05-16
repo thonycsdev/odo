@@ -1,23 +1,18 @@
-import db from "@/lib/db";
+import { handle, ok } from "@/infra/error-handler";
+import { health } from "@/models/health";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const { rows } = await db.query<{
-    version: string;
-    time: string;
-    active_connections: string;
-  }>(`
-    SELECT
-      version(),
-      NOW() AS time,
-      (SELECT count(*) FROM pg_stat_activity WHERE state = 'active') AS active_connections
-  `);
+  try {
+    const { version, time, active_connections } =
+      await health.getDatabaseHealth();
 
-  const { version, time, active_connections } = rows[0];
-
-  return NextResponse.json({
-    version,
-    time,
-    active_connections: Number(active_connections),
-  });
+    return NextResponse.json({
+      version,
+      time,
+      active_connections: Number(active_connections),
+    });
+  } catch (err) {
+    return NextResponse.json(handle(err));
+  }
 }
