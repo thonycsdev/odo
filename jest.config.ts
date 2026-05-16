@@ -7,8 +7,9 @@ const config: Config = {
     "^@/(.*)$": "<rootDir>/$1",
   },
   transform: {
-    "^.+\\.tsx?$": ["@swc/jest", {}],
+    "^.+\\.(t|j)sx?$": ["@swc/jest", {}],
   },
+  transformIgnorePatterns: [],
 };
 
 export default config;

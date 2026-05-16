@@ -1,10 +1,10 @@
 const BASE_URL = process.env.BASE_URL ?? "http://localhost:3000";
 
-describe("GET /api/health", () => {
+describe("GET /api/v1/health", () => {
   let data: Record<string, unknown>;
 
   beforeAll(async () => {
-    const res = await fetch(`${BASE_URL}/api/health`);
+    const res = await fetch(`${BASE_URL}/api/v1/health`);
     expect(res.status).toBe(200);
     data = await res.json();
   });
