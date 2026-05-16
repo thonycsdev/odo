@@ -21,20 +21,34 @@ pnpm migrate:down               # Roll back last migration
 
 To run a single test file:
 ```sh
-pnpm jest tests/health.integration.test.ts
+pnpm jest tests/api/v1/user/user.integration.test.ts
 ```
 
 ## Architecture
 
-**Next.js App Router** — all pages and API routes live under `app/`. API routes follow the `app/api/<name>/route.ts` convention and use `NextResponse.json()`.
+**Next.js App Router** — all pages and API routes live under `app/`. API routes follow the `app/api/v1/<name>/route.ts` convention and use `NextResponse.json()`.
 
-**Database** — `lib/db.ts` exports a shared `pg.Pool` instance. All server-side code (API routes, Server Components) imports from there. Credentials come from `DATABASE_URL` in `.env.development`. Schema is managed with `node-pg-migrate`; migration files live in `migrations/`.
+**Database** — `infra/database.ts` exports a singleton `pg.Pool` instance via `Database.getInstance()`. All server-side code imports from there. Credentials come from `DATABASE_URL` in `.env.development`. Schema is managed with `node-pg-migrate`; migration files live in `migrations/`.
+
+**Models** — live in `models/`. Each model file handles DB queries for a resource. Business logic (validation, hashing) lives here, not in the route.
+
+**Auth** — `models/auth.ts` handles password hashing via bcrypt.
+
+**Error handling** — `infra/error-handler.ts` defines `AppError` subclasses (`BadRequestError`, `NotFoundError`, etc.) and a `handle()` function that maps them to `{ success, status, message }`. Routes catch errors and forward the status: `return NextResponse.json(data, { status: data.status })`.
 
 **UI components** — shadcn/ui components are generated into `components/ui/`. The `cn()` helper in `lib/utils.ts` (clsx + tailwind-merge) is the standard way to compose classNames.
 
 **Infrastructure** — `infra/compose.yml` defines the Postgres service. `infra/scripts/wait-for-postgres.js` polls `localhost:POSTGRES_PORT` via TCP until the database accepts connections; it is called by `db:start`.
 
-**Integration tests** — live in `tests/` and are named `*.integration.test.ts`. They hit the live Next.js server at `BASE_URL` (default `http://localhost:3000`). They are run via `pnpm test:integration`, which starts Postgres and the server first using `concurrently`.
+**Integration tests** — live in `tests/` and are named `*.integration.test.ts`. They hit the live Next.js server at `http://localhost:3000`. Run via `pnpm test:integration`, which starts Postgres and the server first using `concurrently`.
+
+## Testing conventions
+
+- Test data is generated with `@faker-js/faker`.
+- Each test suite calls `orchestrator.resetDatabase()` in `beforeAll` to start from a clean schema.
+- `tests/common/orchestrator.ts` exposes `dropSchema`, `runMigrations`, and `resetDatabase`. Migrations are run programmatically via `node-pg-migrate`'s `runner`.
+- Pool teardown is centralized in `jest.setup.ts` via `afterAll` using a dynamic import to ensure `.env.development` is loaded before the pool is created. Do not close the pool in individual test files.
+- `jest.setup.ts` loads `.env.development` via `dotenv` before any test runs. The database import must be dynamic inside `afterAll` — a top-level import would be hoisted before `config()` runs, leaving `DATABASE_URL` undefined.
 
 ## Environment
 
