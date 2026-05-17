@@ -12,8 +12,10 @@ export type { CreateUserRequest, CreateUserResponse };
 
 const createNewUser = async (data: unknown): Promise<CreateUserResponse> => {
   const parsed = CreateUserRequestSchema.parse(data);
-  await checkIfEmailIsRegistered(parsed.email);
-  await checkIfMemberIDIsRegistered(parsed.member_id ?? null);
+  await Promise.all([
+    checkIfEmailIsRegistered(parsed.email),
+    checkIfMemberIDIsRegistered(parsed.member_id ?? null),
+  ]);
   const password_hashed = await auth.hashPassword(parsed.password);
   const createdUser = await database.query(
     "INSERT INTO Users (email, password_hash,name, member_id) VALUES ($1,$2,$3,$4) RETURNING *",
@@ -29,7 +31,7 @@ const checkIfEmailIsRegistered = async (email: string) => {
 
 const getUserByEmail = async (email: string) => {
   const user = await database.query(
-    "SELECT * FROM Users u WHERE u.email = $1",
+    "SELECT 1 FROM Users WHERE email = $1",
     [email],
   );
   return user[0];
@@ -37,7 +39,7 @@ const getUserByEmail = async (email: string) => {
 
 const getUserByMemberID = async (member_id: string) => {
   const user = await database.query(
-    "SELECT * FROM Users u WHERE u.member_id = $1",
+    "SELECT 1 FROM Users WHERE member_id = $1",
     [member_id],
   );
   return user[0];
