@@ -22,7 +22,7 @@ export const up = (pgm) => {
       onDelete: "CASCADE",
     },
     token_hash: {
-      type: "bytea",
+      type: "text",
       notNull: true,
       unique: true,
     },

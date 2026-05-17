@@ -5,6 +5,7 @@ import {
   CreateUserRequestSchema,
   CreateUserResponse,
   CreateUserResponseSchema,
+  User,
 } from "@/schemas/users";
 import auth from "./auth";
 
@@ -30,16 +31,16 @@ const checkIfEmailIsRegistered = async (email: string) => {
 };
 
 const getUserByEmail = async (email: string) => {
-  const user = await database.query(
-    "SELECT 1 FROM Users WHERE email = $1",
+  const user = await database.query<User>(
+    "SELECT * FROM Users WHERE email = $1",
     [email],
   );
-  return user[0];
+  return user[0] ?? null;
 };
 
 const getUserByMemberID = async (member_id: string) => {
-  const user = await database.query(
-    "SELECT 1 FROM Users WHERE member_id = $1",
+  const user = await database.query<User>(
+    "SELECT * FROM Users WHERE member_id = $1",
     [member_id],
   );
   return user[0];
@@ -51,6 +52,6 @@ const checkIfMemberIDIsRegistered = async (member_id: string | null) => {
   if (user) throw new BadRequestError("member_id already registered");
 };
 
-const user = { createNewUser };
+const user = { createNewUser, getUserByEmail };
 
 export default user;
