@@ -32,6 +32,8 @@ pnpm jest tests/api/v1/user/user.integration.test.ts
 
 **Models** — live in `models/`. Each model file handles DB queries for a resource. Business logic (validation, hashing) lives here, not in the route.
 
+**Schemas** — live in `schemas/`. Each file mirrors one database table and exports Zod schemas used for request validation and response parsing. Models import from here — routes never call Zod directly. Each table schema file exports: the full table schema (e.g. `UserSchema`), request/response schemas (e.g. `CreateUserRequestSchema`, `CreateUserResponseSchema`), and their inferred types. Models accept `data: unknown` and call `Schema.parse(data)` at the top of the function; responses are parsed with the response schema before returning.
+
 **Auth** — `models/auth.ts` handles password hashing via bcrypt.
 
 **Error handling** — `infra/error-handler.ts` defines `AppError` subclasses (`BadRequestError`, `NotFoundError`, etc.) and a `handle()` function that maps them to `{ success, status, message }`. Routes catch errors and forward the status: `return NextResponse.json(data, { status: data.status })`.

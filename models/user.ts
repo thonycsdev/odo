@@ -1,39 +1,27 @@
 import database from "@/infra/database";
 import { BadRequestError } from "@/infra/error-handler";
+import {
+  CreateUserRequest,
+  CreateUserRequestSchema,
+  CreateUserResponse,
+  CreateUserResponseSchema,
+} from "@/schemas/users";
 import auth from "./auth";
 
-export type CreateUserRequest = {
-  email: string;
-  password: string;
-  name: string;
-  member_id: string | null;
-};
+export type { CreateUserRequest, CreateUserResponse };
 
-export type CreateUserResponse = {
-  id: string;
-  email: string;
-  name: string;
-  member_id: string | null;
-  created_at: string;
-};
-
-const createNewUser = async (
-  data: CreateUserRequest,
-): Promise<CreateUserResponse> => {
-  await checkIfEmailIsRegistered(data.email);
-  await checkIfMemberIDIsRegistered(data.member_id);
-  const password_hashed = await auth.hashPassword(data.password);
+const createNewUser = async (data: unknown): Promise<CreateUserResponse> => {
+  const parsed = CreateUserRequestSchema.parse(data);
+  await Promise.all([
+    checkIfEmailIsRegistered(parsed.email),
+    checkIfMemberIDIsRegistered(parsed.member_id ?? null),
+  ]);
+  const password_hashed = await auth.hashPassword(parsed.password);
   const createdUser = await database.query(
     "INSERT INTO Users (email, password_hash,name, member_id) VALUES ($1,$2,$3,$4) RETURNING *",
-    [data.email, password_hashed, data.name, data.member_id],
+    [parsed.email, password_hashed, parsed.name, parsed.member_id ?? null],
   );
-  return {
-    id: createdUser[0].id,
-    email: createdUser[0].email,
-    name: createdUser[0].name,
-    member_id: createdUser[0].member_id,
-    created_at: createdUser[0].created_at,
-  };
+  return CreateUserResponseSchema.parse(createdUser[0]);
 };
 
 const checkIfEmailIsRegistered = async (email: string) => {
@@ -43,7 +31,7 @@ const checkIfEmailIsRegistered = async (email: string) => {
 
 const getUserByEmail = async (email: string) => {
   const user = await database.query(
-    "SELECT * FROM Users u WHERE u.email = $1",
+    "SELECT 1 FROM Users WHERE email = $1",
     [email],
   );
   return user[0];
@@ -51,7 +39,7 @@ const getUserByEmail = async (email: string) => {
 
 const getUserByMemberID = async (member_id: string) => {
   const user = await database.query(
-    "SELECT * FROM Users u WHERE u.member_id = $1",
+    "SELECT 1 FROM Users WHERE member_id = $1",
     [member_id],
   );
   return user[0];
