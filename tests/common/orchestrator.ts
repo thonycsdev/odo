@@ -1,6 +1,8 @@
 import { runner } from "node-pg-migrate";
 import path from "path";
 import database from "@/infra/database";
+import user, { CreateUserResponse } from "@/models/user";
+import { faker } from "@faker-js/faker";
 
 const dropSchema = async () => {
   await database.query("DROP SCHEMA public CASCADE");
@@ -26,6 +28,24 @@ const resetDatabase = async () => {
   await runMigrations();
 };
 
-const orchestrator = { dropSchema, runMigrations, resetDatabase };
+const createUser = async (
+  overrides: Partial<{
+    email: string;
+    password: string;
+    name: string;
+    member_id: string | null;
+  }> = {},
+): Promise<CreateUserResponse & { password: string }> => {
+  const data = {
+    email: overrides.email ?? faker.internet.email(),
+    password: overrides.password ?? faker.internet.password({ length: 12 }),
+    name: overrides.name ?? faker.person.fullName(),
+    member_id: overrides.member_id ?? null,
+  };
+  const created = await user.createNewUser(data);
+  return { ...created, password: data.password };
+};
+
+const orchestrator = { dropSchema, runMigrations, resetDatabase, createUser };
 
 export default orchestrator;

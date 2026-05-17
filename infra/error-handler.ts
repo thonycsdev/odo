@@ -36,6 +36,13 @@ export class UnauthorizedError extends AppError {
   }
 }
 
+export class InvalidCredentials extends AppError {
+  constructor(message = "Invalid credentials") {
+    super(401, message);
+    this.name = "Invalid credentials";
+  }
+}
+
 export class ForbiddenError extends AppError {
   constructor(message = "Forbidden") {
     super(403, message);
