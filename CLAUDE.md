@@ -7,8 +7,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```sh
 pnpm dev                        # Start Postgres (Docker) + Next.js dev server
 pnpm build                      # Production build
-pnpm lint                       # Run ESLint
-
 pnpm test                       # Run all Jest tests
 pnpm test:watch                 # Jest in watch mode
 pnpm test:integration           # Start Postgres + Next.js, then run tests in tests/
