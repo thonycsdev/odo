@@ -94,16 +94,16 @@ describe('POST /api/v1/auth/login', () => {
       const responseBody = await response.json();
       expect(responseBody).toEqual({
         token: responseBody.token,
-        userId: createdUser.id,
-        createdAt: responseBody.createdAt,
-        expiresAt: responseBody.expiresAt,
+        user_id: createdUser.id,
+        created_at: responseBody.created_at,
+        expires_at: responseBody.expires_at,
       });
 
       const SESSION_TTL_MS = 60 * 60 * 24 * 30 * 1000; // 30 days
-      const createdAt = new Date(responseBody.createdAt);
+      const createdAt = new Date(responseBody.created_at);
       createdAt.setMilliseconds(0);
       createdAt.setSeconds(0);
-      const expiresAt = new Date(responseBody.expiresAt);
+      const expiresAt = new Date(responseBody.expires_at);
       expiresAt.setMilliseconds(0);
       expiresAt.setSeconds(0);
       expect(expiresAt.getTime() - createdAt.getTime()).toBe(SESSION_TTL_MS);

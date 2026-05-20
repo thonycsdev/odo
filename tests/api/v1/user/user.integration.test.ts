@@ -40,7 +40,7 @@ describe('POST /api/v1/user', () => {
 
     expect(res.status).toBe(201);
     expect(body.id).toBeDefined();
-    expect(body.memberId).toBeDefined();
+    expect(body.member_id).toBeDefined();
   });
 
   it('returns the correct fields and does not expose password_hash', async () => {
@@ -52,8 +52,8 @@ describe('POST /api/v1/user', () => {
     expect(body.id).toBeDefined();
     expect(body.email).toBe(request.email);
     expect(body.name).toBe(request.name);
-    expect(body.createdAt).toBeDefined();
-    expect(body.passwordHash).toBeUndefined();
+    expect(body.created_at).toBeDefined();
+    expect(body.password_hash).toBeUndefined();
   });
 
   it('rejects duplicate email', async () => {
