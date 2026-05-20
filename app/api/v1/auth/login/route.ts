@@ -13,7 +13,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       sameSite: 'lax',
       secure: !environment.isDevEnvironment(),
       path: '/',
-      expires: new Date(authenticationInfo.expiresAt),
+      expires: new Date(authenticationInfo.expires_at),
     });
     return response;
   } catch (err) {
