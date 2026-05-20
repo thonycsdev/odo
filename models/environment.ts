@@ -1,4 +1,4 @@
-const isDevEnvironment = () => process.env.NODE_ENV === "development";
+const isDevEnvironment = (): boolean => process.env.NODE_ENV === 'development';
 
 const environment = { isDevEnvironment };
 

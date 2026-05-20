@@ -1,12 +1,15 @@
-import { Pool, QueryResultRow } from "pg";
+import { Pool, type QueryResultRow } from 'pg';
 
-interface IDatabase {
+export interface Database {
   getPool(): Pool;
-  query<T extends QueryResultRow>(sql: string, params?: unknown[]): Promise<T[]>;
+  query<T extends QueryResultRow>(
+    sql: string,
+    params?: unknown[],
+  ): Promise<T[]>;
 }
 
-class Database implements IDatabase {
-  private static instance: Database;
+class DatabaseClient implements Database {
+  private static instance: DatabaseClient;
   private pool: Pool;
 
   private constructor() {
@@ -15,22 +18,25 @@ class Database implements IDatabase {
     });
   }
 
-  static getInstance(): Database {
-    if (!Database.instance) {
-      Database.instance = new Database();
+  static getInstance(): DatabaseClient {
+    if (!DatabaseClient.instance) {
+      DatabaseClient.instance = new DatabaseClient();
     }
-    return Database.instance;
+    return DatabaseClient.instance;
   }
 
   getPool(): Pool {
     return this.pool;
   }
 
-  async query<T extends QueryResultRow>(sql: string, params?: unknown[]): Promise<T[]> {
+  async query<T extends QueryResultRow>(
+    sql: string,
+    params?: unknown[],
+  ): Promise<T[]> {
     const result = await this.pool.query<T>(sql, params);
     return result.rows;
   }
 }
 
-const database = Database.getInstance();
+const database = DatabaseClient.getInstance();
 export default database;

@@ -1,13 +1,14 @@
-import database from "@/infra/database";
-import { BadRequestError } from "@/infra/error-handler";
+import database from '@/infra/database';
+import { BadRequestError, DatabaseError } from '@/infra/error-handler';
 import {
-  CreateUserRequest,
+  type CreateUserRequest,
   CreateUserRequestSchema,
-  CreateUserResponse,
+  type CreateUserResponse,
   CreateUserResponseSchema,
-  User,
-} from "@/schemas/users";
-import auth from "./auth";
+  type User,
+  UserSchema,
+} from '@/schemas/users';
+import auth from './auth';
 
 export type { CreateUserRequest, CreateUserResponse };
 
@@ -15,41 +16,54 @@ const createNewUser = async (data: unknown): Promise<CreateUserResponse> => {
   const parsed = CreateUserRequestSchema.parse(data);
   await Promise.all([
     checkIfEmailIsRegistered(parsed.email),
-    checkIfMemberIDIsRegistered(parsed.member_id ?? null),
+    checkIfMemberIdIsRegistered(parsed.memberId ?? null),
   ]);
-  const password_hashed = await auth.hashPassword(parsed.password);
-  const createdUser = await database.query(
-    "INSERT INTO Users (email, password_hash,name, member_id) VALUES ($1,$2,$3,$4) RETURNING *",
-    [parsed.email, password_hashed, parsed.name, parsed.member_id ?? null],
+  const passwordHashed = await auth.hashPassword(parsed.password);
+  const result = await insertNewUser({ ...parsed, password: passwordHashed });
+  if (!result) throw new DatabaseError('Erro while creating a new user');
+  return CreateUserResponseSchema.parse(result);
+};
+
+const insertNewUser = async (
+  userData: CreateUserRequest,
+): Promise<User | null> => {
+  const rows = await database.query<{ [key: string]: unknown }>(
+    'INSERT INTO users (email, password_hash, name, member_id) VALUES ($1, $2, $3, $4) RETURNING *',
+    [userData.email, userData.password, userData.name, userData.memberId ?? null],
   );
-  return CreateUserResponseSchema.parse(createdUser[0]);
+  const row = rows[0];
+  return row ? UserSchema.parse(row) : null;
 };
 
-const checkIfEmailIsRegistered = async (email: string) => {
+const checkIfEmailIsRegistered = async (email: string): Promise<void> => {
   const user = await getUserByEmail(email);
-  if (user) throw new BadRequestError("email already registered");
+  if (user) throw new BadRequestError('email already registered');
 };
 
-const getUserByEmail = async (email: string) => {
-  const user = await database.query<User>(
-    "SELECT * FROM Users WHERE email = $1",
+const getUserByEmail = async (email: string): Promise<User | null> => {
+  const rows = await database.query<{ [key: string]: unknown }>(
+    'SELECT * FROM users WHERE email = $1',
     [email],
   );
-  return user[0] ?? null;
+  const row = rows[0];
+  return row ? UserSchema.parse(row) : null;
 };
 
-const getUserByMemberID = async (member_id: string) => {
-  const user = await database.query<User>(
-    "SELECT * FROM Users WHERE member_id = $1",
-    [member_id],
+const getUserByMemberId = async (memberId: string): Promise<User | null> => {
+  const rows = await database.query<{ [key: string]: unknown }>(
+    'SELECT * FROM users WHERE member_id = $1',
+    [memberId],
   );
-  return user[0];
+  const row = rows[0];
+  return row ? UserSchema.parse(row) : null;
 };
 
-const checkIfMemberIDIsRegistered = async (member_id: string | null) => {
-  if (!member_id || member_id.trim().length === 0) return;
-  const user = await getUserByMemberID(member_id);
-  if (user) throw new BadRequestError("member_id already registered");
+const checkIfMemberIdIsRegistered = async (
+  memberId: string | null,
+): Promise<void> => {
+  if (!memberId || memberId.trim().length === 0) return;
+  const user = await getUserByMemberId(memberId);
+  if (user) throw new BadRequestError('memberId already registered');
 };
 
 const user = { createNewUser, getUserByEmail };
