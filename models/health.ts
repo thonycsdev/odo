@@ -1,17 +1,19 @@
-import database from "@/infra/database"
+import database from '@/infra/database';
+import { DatabaseError } from '@/infra/error-handler';
+import type { HealthResponse } from '@/schemas/health';
+import { HealthResponseSchema, HealthSchema } from '@/schemas/health';
 
-const getDatabaseHealth = async () => {
-    const data = await database.query<{
-    version: string;
-    time: string;
-    active_connections: string;
-  }>(`
+const getDatabaseHealth = async (): Promise<HealthResponse> => {
+  const data = await database.query(`
     SELECT
       version(),
       NOW() AS time,
       (SELECT count(*) FROM pg_stat_activity WHERE state = 'active') AS active_connections
   `);
-    return data[0];
-}
+  const row = data[0];
+  if (!row) throw new DatabaseError();
+  const parsed = HealthSchema.parse(row);
+  return HealthResponseSchema.parse(parsed);
+};
 
-export const health = {getDatabaseHealth}
+export const health = { getDatabaseHealth };

@@ -1,18 +1,13 @@
-import { handle, ok } from "@/infra/error-handler";
-import { health } from "@/models/health";
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import { handle } from '@/infra/error-handler';
+import { health } from '@/models/health';
 
-export async function GET() {
+export async function GET(): Promise<NextResponse> {
   try {
-    const { version, time, active_connections } =
-      await health.getDatabaseHealth();
-
-    return NextResponse.json({
-      version,
-      time,
-      active_connections: Number(active_connections),
-    });
+    const data = await health.getDatabaseHealth();
+    return NextResponse.json(data);
   } catch (err) {
-    return NextResponse.json(handle(err));
+    const errorData = handle(err);
+    return NextResponse.json(errorData, { status: errorData.status });
   }
 }

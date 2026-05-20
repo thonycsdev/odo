@@ -1,13 +1,13 @@
-import type { Config } from "jest";
+import type { Config } from 'jest';
 
 const config: Config = {
-  testEnvironment: "node",
-  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+  testEnvironment: 'node',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/$1",
+    '^@/(.*)$': '<rootDir>/$1',
   },
   transform: {
-    "^.+\\.(t|j)sx?$": ["@swc/jest", {}],
+    '^.+\\.(t|j)sx?$': ['@swc/jest', {}],
   },
   transformIgnorePatterns: [],
 };

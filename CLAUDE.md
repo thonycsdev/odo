@@ -53,3 +53,49 @@ pnpm jest tests/api/v1/user/user.integration.test.ts
 ## Environment
 
 `.env.development` is the development env file (gitignored). It sets `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_PORT`, and `DATABASE_URL`.
+
+## Code style
+
+This project follows the **Google TypeScript Style Guide**. Biome enforces most rules automatically — run `pnpm lint:fix` to auto-fix. The scripts are:
+
+```sh
+pnpm lint           # Lint only, report errors
+pnpm lint:check     # Lint + format check (no writes)
+pnpm lint:fix       # Lint + format, auto-fix everything possible
+```
+
+**Biome-enforced rules (automatic):**
+
+- 2-space indentation, 80-character line width, LF line endings
+- Single quotes, always semicolons, trailing commas everywhere
+- No `var` — use `const` by default, `let` only when reassignment is needed
+- Use template literals over string concatenation
+- Use `import type` for type-only imports
+- Avoid `any` type
+- Avoid non-null assertions (`!`)
+- Use `===` / `!==`, never `==` / `!=`
+- No `debugger` statements
+- Unused variables are errors
+- Prefer arrow functions for callbacks
+- `default` case must be last in switch statements
+
+**Rules enforced manually on commit check:**
+
+- **Explicit return types** — all functions and methods must declare their return type (e.g. `function foo(): string`)
+- **Naming conventions**:
+  - Variables, parameters, functions, methods: `lowerCamelCase`
+  - Classes, interfaces, type aliases, enums: `UpperCamelCase`
+  - File names: `lower_snake_case.ts`
+  - Database column names, table names, and migration identifiers: `snake_case`
+- **No `@ts-ignore`** — do not suppress TypeScript errors silently
+
+## Code quality analysis
+
+When asked to analyze code quality, always cross-reference the [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html) as the authoritative source.
+
+When a violation is found, explain it deeply:
+
+- **What the rule is** and where it comes from in the Google style guide
+- **Why it exists** — the reasoning or problem it prevents
+- **What the current code does wrong** — point to the exact line/pattern
+- **What the correct version looks like** — show a concrete before/after example
