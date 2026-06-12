@@ -8,7 +8,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: ui-monospace, monospace;
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -115,6 +115,27 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+@theme {
+  /* Brand — purple scale used across the app */
+  --color-brand-300: oklch(0.769 0.188 291);
+  --color-brand-400: oklch(0.714 0.203 291);
+  --color-brand-500: oklch(0.627 0.265 304);
+  --color-brand-600: oklch(0.558 0.288 302);
+  --color-brand-700: oklch(0.496 0.265 304);
+  --color-brand-800: oklch(0.432 0.232 301);
+  --color-brand-900: oklch(0.371 0.191 296);
+  --color-brand-950: oklch(0.291 0.149 303);
+
+  /* Belt system — ordered from lowest to highest rank */
+  --color-belt-white: oklch(1 0 0);
+  --color-belt-yellow: oklch(0.852 0.199 92);
+  --color-belt-orange: oklch(0.702 0.191 47);
+  --color-belt-green: oklch(0.723 0.19 149);
+  --color-belt-blue: oklch(0.611 0.214 260);
+  --color-belt-red: oklch(0.577 0.245 27);
+  --color-belt-black: oklch(0.1 0 0);
 }
 
 @layer base {
