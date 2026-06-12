@@ -19,6 +19,29 @@ const postLogin = (body: Record<string, unknown>): Promise<Response> =>
 
 describe('POST /api/v1/auth/login', () => {
   describe('Authenticated User', () => {
+    test('should clear the session_token cookie', async () => {
+      const userData = await orchestrator.createUser();
+
+      const loginResponse = await postLogin({
+        email: userData.email,
+        password: userData.password,
+      });
+      const loginCookies = setCookieParser(loginResponse, { map: true });
+      const sessionCookie = `session_token=${loginCookies.session_token.value}`;
+
+      const logoutResponse = await fetch(`${BASE_URL}/api/v1/auth/logout`, {
+        method: 'POST',
+        headers: { Cookie: sessionCookie },
+      });
+
+      expect(logoutResponse.status).toBe(200);
+      const logoutCookies = setCookieParser(logoutResponse, { map: true });
+      expect(logoutCookies.session_token.value).toBe('');
+      expect(logoutCookies.session_token.expires?.getTime()).toBeLessThan(
+        Date.now(),
+      );
+    });
+
     test('POST should change expiration date to NOW - 2 Days', async () => {
       const userData = await orchestrator.createUser();
 

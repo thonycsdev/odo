@@ -110,6 +110,16 @@ const logoutUser = async (req: NextRequest): Promise<void> => {
   if (!result) throw new DatabaseError('Error to update session information');
 };
 
-const session = { checkCredentials, logoutUser };
+const checkCurrentSession = async (token: string) => {
+  const hash = auth.hashToken(token);
+  const session = await getSessionByCookieId(hash);
+  if (!session) throw new InvalidCredentialsError('Invalid Token Given');
+  const current_user = await user.getUserById(session.user_id);
+  if (!current_user)
+    throw new InvalidCredentialsError('Invalid Token - User Not Identified');
+  return current_user.email;
+};
+
+const session = { checkCredentials, logoutUser, checkCurrentSession };
 
 export default session;

@@ -29,7 +29,12 @@ const insertNewUser = async (
 ): Promise<User | null> => {
   const rows = await database.query<{ [key: string]: unknown }>(
     'INSERT INTO users (email, password_hash, name, member_id) VALUES ($1, $2, $3, $4) RETURNING *',
-    [userData.email, userData.password, userData.name, userData.memberId ?? null],
+    [
+      userData.email,
+      userData.password,
+      userData.name,
+      userData.memberId ?? null,
+    ],
   );
   const row = rows[0];
   return row ? UserSchema.parse(row) : null;
@@ -66,6 +71,14 @@ const checkIfMemberIdIsRegistered = async (
   if (user) throw new BadRequestError('memberId already registered');
 };
 
-const user = { createNewUser, getUserByEmail };
+const getUserById = async (userId: string): Promise<User | null> => {
+  const rows = await database.query('SELECT * FROM users WHERE id = $1', [
+    userId,
+  ]);
+  const row = rows[0];
+  return row ? UserSchema.parse(row) : null;
+};
+
+const user = { createNewUser, getUserByEmail, getUserById };
 
 export default user;
