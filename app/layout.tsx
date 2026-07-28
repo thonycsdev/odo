@@ -9,9 +9,9 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'odo — Treine. Evolua. Domine.',
+  title: 'odo — Economize. Cresça. Conquiste.',
   description:
-    'Registre seu progresso na academia, compare com outros atletas e suba de faixa como no Taekwondo.',
+    'Registre seus gastos, defina metas de economia e acompanhe sua evolução financeira até a liberdade financeira.',
 };
 
 export default function RootLayout({
