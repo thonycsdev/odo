@@ -12,7 +12,6 @@ const buildRequest = (
   email: faker.internet.email(),
   password: faker.internet.password(),
   name: faker.person.fullName(),
-  memberId: null,
   ...overrides,
 });
 
@@ -24,24 +23,6 @@ const postUser = (body: CreateUserRequest): Promise<Response> =>
   });
 
 describe('POST /api/v1/user', () => {
-  it('creates a user with null memberId', async () => {
-    const res = await postUser(buildRequest({ memberId: null }));
-    const body = await res.json();
-
-    expect(res.status).toBe(201);
-    expect(body.id).toBeDefined();
-  });
-
-  it('creates a user with a memberId', async () => {
-    const res = await postUser(
-      buildRequest({ memberId: faker.string.alphanumeric(10) }),
-    );
-    const body = await res.json();
-
-    expect(res.status).toBe(201);
-    expect(body.id).toBeDefined();
-    expect(body.member_id).toBeDefined();
-  });
 
   it('returns the correct fields and does not expose password_hash', async () => {
     const request = buildRequest();
@@ -61,17 +42,6 @@ describe('POST /api/v1/user', () => {
     await postUser(request);
 
     const res = await postUser(buildRequest({ email: request.email }));
-    const body = await res.json();
-
-    expect(res.status).toBe(400);
-    expect(body.success).toBe(false);
-  });
-
-  it('rejects duplicate memberId', async () => {
-    const memberId = faker.string.alphanumeric(10);
-    await postUser(buildRequest({ memberId }));
-
-    const res = await postUser(buildRequest({ memberId }));
     const body = await res.json();
 
     expect(res.status).toBe(400);

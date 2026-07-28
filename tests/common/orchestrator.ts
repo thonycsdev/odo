@@ -33,14 +33,12 @@ const createUser = async (
     email: string;
     password: string;
     name: string;
-    memberId: string | null;
   }> = {},
 ): Promise<CreateUserResponse & { password: string }> => {
   const data = {
     email: overrides.email ?? faker.internet.email(),
     password: overrides.password ?? faker.internet.password({ length: 12 }),
     name: overrides.name ?? faker.person.fullName(),
-    memberId: overrides.memberId ?? null,
   };
   const created = await user.createNewUser(data);
   return { ...created, password: data.password };

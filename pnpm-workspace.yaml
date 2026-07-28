@@ -1,3 +1,9 @@
+allowBuilds:
+  '@swc/core': true
+  bcrypt: true
+  msw: true
+  sharp: true
+  unrs-resolver: true
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
