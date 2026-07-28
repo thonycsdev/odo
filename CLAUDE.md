@@ -36,7 +36,14 @@ pnpm jest tests/api/v1/user/user.integration.test.ts
 
 **Error handling** — `infra/error-handler.ts` defines `AppError` subclasses (`BadRequestError`, `NotFoundError`, etc.) and a `handle()` function that maps them to `{ success, status, message }`. Routes catch errors and forward the status: `return NextResponse.json(data, { status: data.status })`.
 
-**UI components** — shadcn/ui components are generated into `components/ui/`. The `cn()` helper in `lib/utils.ts` (clsx + tailwind-merge) is the standard way to compose classNames.
+**UI components** — the project uses [GitHub Primer React](https://primer.style/product) (`@primer/react`) as the component library and default style choice; shadcn/ui and Tailwind-based UI were removed during the rebrand (`app/globals.css` is intentionally empty). `app/layout.tsx` wraps the app in `ThemeProvider` + `BaseStyles` and imports `@primer/primitives/dist/css/functional/themes/light.css` for the design tokens (CSS custom properties like `--fgColor-default`, `--bgColor-muted`, `--borderColor-default`).
+
+Notes specific to the installed version (`@primer/react` ^38.34.0):
+- There is **no `Box` component** in this version — use `Stack` (props: `direction`, `gap`, `align`, `justify`, `wrap`, `padding`, each accepting a responsive `{narrow, regular, wide}` object) for layout instead of custom CSS/flexbox.
+- Page-level structure (header/content/footer regions, max-width containment) comes from `PageLayout` (`containerWidth`, `PageLayout.Header`, `PageLayout.Content`, `PageLayout.Footer`) — avoid hand-rolled container/max-width CSS.
+- `Card` and `Blankslate` (used for marketing/empty-state sections, with `.Heading`, `.Description`, `.PrimaryAction`, `.SecondaryAction` subcomponents) are exported from the **`@primer/react/experimental`** subpath, not the main package entry point.
+- Prefer components + Primer CSS variables over new CSS files; there was no `Box`/`sx` prop system in this version to reach for, so layout composition happens through `Stack`/`PageLayout` props.
+- Check `node_modules/@primer/react/dist/index.d.ts` (and `dist/experimental/index.d.ts`) directly when in doubt — the exported API can differ from older Primer docs/examples found online.
 
 **Infrastructure** — `infra/compose.yml` defines the Postgres service. `infra/scripts/wait-for-postgres.js` polls `localhost:POSTGRES_PORT` via TCP until the database accepts connections; it is called by `db:start`.
 
