@@ -1,12 +1,17 @@
-'use client'
 import {
-  Header,
-  LinkButton,
-  PageLayout,
+  Box,
+  Button,
+  Container,
+  EmptyState,
+  Flex,
+  Heading,
+  HStack,
+  Link,
+  SimpleGrid,
   Stack,
   Text,
-} from '@primer/react';
-import { Blankslate, Card } from '@primer/react/experimental';
+} from '@chakra-ui/react';
+import NextLink from 'next/link';
 
 const features = [
   {
@@ -26,58 +31,77 @@ const features = [
   },
 ];
 
-
 export default function Home(): React.JSX.Element {
   return (
-    <PageLayout containerWidth="full">
-      <PageLayout.Header>
-        <Header>
-          <Header.Item>
-            <Header.Link href="/">odo</Header.Link>
-          </Header.Item>
-          <Header.Item full />
-          <Header.Item>
-            <LinkButton href="/account/login" color='white' size='small'>
-              Entrar
-            </LinkButton>
-          </Header.Item>
-          <Header.Item>
-            <LinkButton href="/account/login" variant="primary" size="small">
-              Criar conta grátis
-            </LinkButton>
-          </Header.Item>
-        </Header>
-      </PageLayout.Header>
+    <Flex direction="column" minH="100vh">
+      <Box as="header" borderBottomWidth="1px">
+        <Container maxW="6xl">
+          <HStack justify="space-between" py="3">
+            <Link asChild fontWeight="semibold" fontSize="lg">
+              <NextLink href="/">odo</NextLink>
+            </Link>
+            <HStack gap="3">
+              <Button asChild variant="ghost" size="sm">
+                <NextLink href="/account/login">Entrar</NextLink>
+              </Button>
+              <Button asChild variant="solid" size="sm">
+                <NextLink href="/account/login">Criar conta grátis</NextLink>
+              </Button>
+            </HStack>
+          </HStack>
+        </Container>
+      </Box>
 
-      <PageLayout.Content>
-        <Blankslate spacious>
-          <Blankslate.Heading as="h1">
-            Economize. Cresça. Conquiste.
-          </Blankslate.Heading>
-          <Blankslate.Description>
-            Registre seus gastos, defina metas de economia e acompanhe sua
-            evolução financeira até a liberdade financeira.
-          </Blankslate.Description>
-          <Blankslate.PrimaryAction href="/account/login">
-            Criar conta grátis
-          </Blankslate.PrimaryAction>
-          <Blankslate.SecondaryAction href="#recursos">
-            Ver como funciona
-          </Blankslate.SecondaryAction>
-        </Blankslate>
+      <Container maxW="6xl" flex="1" py={{ base: '12', md: '20' }}>
+        <EmptyState.Root size="lg">
+          <EmptyState.Content>
+            <Stack textAlign="center" gap="4">
+              <EmptyState.Title as="h1" fontSize={{ base: '3xl', md: '5xl' }}>
+                Economize. Cresça. Conquiste.
+              </EmptyState.Title>
+              <EmptyState.Description maxW="lg" mx="auto" fontSize="lg">
+                Registre seus gastos, defina metas de economia e acompanhe
+                sua evolução financeira até a liberdade financeira.
+              </EmptyState.Description>
+            </Stack>
+            <HStack gap="3">
+              <Button asChild size="lg">
+                <NextLink href="/account/login">Criar conta grátis</NextLink>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <a href="#recursos">Ver como funciona</a>
+              </Button>
+            </HStack>
+          </EmptyState.Content>
+        </EmptyState.Root>
 
-        <Stack direction="vertical" align="center" padding="spacious">
+        <SimpleGrid
+          id="recursos"
+          columns={{ base: 1, md: 3 }}
+          gap="8"
+          mt={{ base: '16', md: '24' }}
+        >
+          {features.map((feature) => (
+            <Stack key={feature.title} gap="2">
+              <Heading as="h3" size="md">
+                {feature.title}
+              </Heading>
+              <Text color="fg.muted">{feature.description}</Text>
+            </Stack>
+          ))}
+        </SimpleGrid>
+      </Container>
 
-        </Stack>
-      </PageLayout.Content>
-
-      <PageLayout.Footer divider="line">
-        <Stack direction="horizontal" justify="space-between" align="center">
-          <Text size="small">
-            &copy; {new Date().getFullYear()} odo. Todos os direitos reservados.
-          </Text>
-        </Stack>
-      </PageLayout.Footer>
-    </PageLayout>
+      <Box as="footer" borderTopWidth="1px">
+        <Container maxW="6xl">
+          <HStack justify="space-between" py="4">
+            <Text fontSize="sm" color="fg.muted">
+              &copy; {new Date().getFullYear()} odo. Todos os direitos
+              reservados.
+            </Text>
+          </HStack>
+        </Container>
+      </Box>
+    </Flex>
   );
 }

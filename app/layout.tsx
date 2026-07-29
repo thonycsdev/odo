@@ -1,10 +1,7 @@
 import type { Metadata } from 'next';
 import { Space_Grotesk } from 'next/font/google';
-import '@primer/primitives/dist/css/functional/themes/light.css';
+import { Provider } from '@/components/ui/provider';
 import './globals.css';
-
-import { BaseStyles, ThemeProvider } from '@primer/react';
-
 const spaceGrotesk = Space_Grotesk({
   variable: '--font-sans',
   subsets: ['latin'],
@@ -25,15 +22,13 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
+      suppressHydrationWarning
       className={`${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ThemeProvider colorMode='dark'>
-          <BaseStyles>
-            {children}
-          </BaseStyles>
-        </ThemeProvider>
-
+        <Provider>
+          {children}
+        </Provider>
       </body>
     </html >
   );
