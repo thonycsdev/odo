@@ -17,11 +17,6 @@ export const up = (pgm) => {
       type: "varchar(255)",
       notNull: true,
     },
-    member_id: {
-      type: "varchar(100)",
-      notNull: false,
-      unique: true,
-    },
     created_at: {
       type: "timestamptz",
       notNull: true,
@@ -33,8 +28,6 @@ export const up = (pgm) => {
       default: pgm.func("now()"),
     },
   });
-
-  pgm.createIndex("users", "member_id");
 };
 
 /**

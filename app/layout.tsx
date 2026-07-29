@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Space_Grotesk } from 'next/font/google';
+import { Provider } from '@/components/ui/provider';
 import './globals.css';
-
 const spaceGrotesk = Space_Grotesk({
   variable: '--font-sans',
   subsets: ['latin'],
@@ -9,9 +9,9 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'odo — Treine. Evolua. Domine.',
+  title: 'odo — Economize. Cresça. Conquiste.',
   description:
-    'Registre seu progresso na academia, compare com outros atletas e suba de faixa como no Taekwondo.',
+    'Registre seus gastos, defina metas de economia e acompanhe sua evolução financeira até a liberdade financeira.',
 };
 
 export default function RootLayout({
@@ -22,9 +22,14 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
+      suppressHydrationWarning
       className={`${spaceGrotesk.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
-    </html>
+      <body className="min-h-full flex flex-col">
+        <Provider>
+          {children}
+        </Provider>
+      </body>
+    </html >
   );
 }

@@ -14,10 +14,7 @@ export type { CreateUserRequest, CreateUserResponse };
 
 const createNewUser = async (data: unknown): Promise<CreateUserResponse> => {
   const parsed = CreateUserRequestSchema.parse(data);
-  await Promise.all([
-    checkIfEmailIsRegistered(parsed.email),
-    checkIfMemberIdIsRegistered(parsed.memberId ?? null),
-  ]);
+  await checkIfEmailIsRegistered(parsed.email);
   const passwordHashed = await auth.hashPassword(parsed.password);
   const result = await insertNewUser({ ...parsed, password: passwordHashed });
   if (!result) throw new DatabaseError('Erro while creating a new user');
@@ -28,13 +25,8 @@ const insertNewUser = async (
   userData: CreateUserRequest,
 ): Promise<User | null> => {
   const rows = await database.query<{ [key: string]: unknown }>(
-    'INSERT INTO users (email, password_hash, name, member_id) VALUES ($1, $2, $3, $4) RETURNING *',
-    [
-      userData.email,
-      userData.password,
-      userData.name,
-      userData.memberId ?? null,
-    ],
+    'INSERT INTO users (email, password_hash, name) VALUES ($1, $2, $3) RETURNING *',
+    [userData.email, userData.password, userData.name],
   );
   const row = rows[0];
   return row ? UserSchema.parse(row) : null;
@@ -52,23 +44,6 @@ const getUserByEmail = async (email: string): Promise<User | null> => {
   );
   const row = rows[0];
   return row ? UserSchema.parse(row) : null;
-};
-
-const getUserByMemberId = async (memberId: string): Promise<User | null> => {
-  const rows = await database.query<{ [key: string]: unknown }>(
-    'SELECT * FROM users WHERE member_id = $1',
-    [memberId],
-  );
-  const row = rows[0];
-  return row ? UserSchema.parse(row) : null;
-};
-
-const checkIfMemberIdIsRegistered = async (
-  memberId: string | null,
-): Promise<void> => {
-  if (!memberId || memberId.trim().length === 0) return;
-  const user = await getUserByMemberId(memberId);
-  if (user) throw new BadRequestError('memberId already registered');
 };
 
 const getUserById = async (userId: string): Promise<User | null> => {
