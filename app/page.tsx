@@ -45,7 +45,7 @@ export default function Home(): React.JSX.Element {
                 <NextLink href="/account/login">Entrar</NextLink>
               </Button>
               <Button asChild variant="solid" size="sm">
-                <NextLink href="/account/login">Criar conta grátis</NextLink>
+                <NextLink href="/account/create">Criar conta grátis</NextLink>
               </Button>
             </HStack>
           </HStack>
@@ -66,7 +66,7 @@ export default function Home(): React.JSX.Element {
             </Stack>
             <HStack gap="3">
               <Button asChild size="lg">
-                <NextLink href="/account/login">Criar conta grátis</NextLink>
+                <NextLink href="/account/create">Criar conta grátis</NextLink>
               </Button>
               <Button asChild size="lg" variant="outline">
                 <a href="#recursos">Ver como funciona</a>
