@@ -1,5 +1,6 @@
-import { ZodError } from 'zod';
-import logger from '@/infra/logger';
+import { ZodError } from "zod";
+import logger from "@/infra/logger";
+import { NextRequest, NextResponse } from "next/server";
 
 interface ApiResponse<T = null> {
   success: boolean;
@@ -14,52 +15,52 @@ export class AppError extends Error {
     message: string,
   ) {
     super(message);
-    this.name = 'AppError';
+    this.name = "AppError";
   }
 }
 export class DatabaseError extends AppError {
-  constructor(message = 'Database Related Error') {
+  constructor(message = "Database Related Error") {
     super(500, message);
-    this.name = 'DatabaseError';
+    this.name = "DatabaseError";
   }
 }
 
 export class NotFoundError extends AppError {
-  constructor(message = 'Not found') {
+  constructor(message = "Not found") {
     super(404, message);
-    this.name = 'NotFoundError';
+    this.name = "NotFoundError";
   }
 }
 
 export class BadRequestError extends AppError {
-  constructor(message = 'Bad request') {
+  constructor(message = "Bad request") {
     super(400, message);
-    this.name = 'BadRequestError';
+    this.name = "BadRequestError";
   }
 }
 
 export class UnauthorizedError extends AppError {
-  constructor(message = 'Unauthorized') {
+  constructor(message = "Unauthorized") {
     super(401, message);
-    this.name = 'UnauthorizedError';
+    this.name = "UnauthorizedError";
   }
 }
 
 export class InvalidCredentialsError extends AppError {
-  constructor(message = 'Invalid credentials') {
+  constructor(message = "Invalid credentials") {
     super(401, message);
-    this.name = 'Invalid credentials';
+    this.name = "Invalid credentials";
   }
 }
 
 export class ForbiddenError extends AppError {
-  constructor(message = 'Forbidden') {
+  constructor(message = "Forbidden") {
     super(403, message);
-    this.name = 'ForbiddenError';
+    this.name = "ForbiddenError";
   }
 }
 
-export function ok<T>(data: T, message = 'Success'): ApiResponse<T> {
+export function ok<T>(data: T, message = "Success"): ApiResponse<T> {
   return { success: true, status: 200, message, data };
 }
 
@@ -70,12 +71,25 @@ export function fail(status: number, message: string): ApiResponse {
 export function handle(error: unknown): ApiResponse {
   if (error instanceof ZodError) {
     logger.info({ err: error }, error.name);
-    return fail(422, error.issues.at(0)?.message ?? 'Invalid Field');
+    return fail(422, error.issues.at(0)?.message ?? `Invalid Field`);
   }
   if (error instanceof AppError) {
     logger.error({ err: error }, error.name);
     return fail(error.status, error.message);
   }
-  logger.error({ err: error }, 'Unhandled application error');
-  return fail(500, 'Internal server error');
+  logger.error({ err: error }, "Unhandled application error");
+  return fail(500, "Internal server error");
+}
+
+type RouterHandler = (req: NextRequest) => Promise<NextResponse>;
+
+export function withErrorHandling(handler: RouterHandler): RouterHandler {
+  return async (req) => {
+    try {
+      return await handler(req);
+    } catch (e) {
+      const data = handle(e);
+      return NextResponse.json(data, { status: data.status });
+    }
+  };
 }

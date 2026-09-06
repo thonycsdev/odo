@@ -24,6 +24,7 @@ export const up = (pgm) => {
     amount_cents: {
       type: "integer",
       notNull: true,
+      default: 0,
     },
     description: {
       type: "varchar(255)",

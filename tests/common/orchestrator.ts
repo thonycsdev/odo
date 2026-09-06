@@ -1,12 +1,15 @@
-import path from 'node:path';
-import { faker } from '@faker-js/faker';
-import { runner } from 'node-pg-migrate';
-import database from '@/infra/database';
-import user, { type CreateUserResponse } from '@/models/user';
+import path from "node:path";
+import { faker } from "@faker-js/faker";
+import { runner } from "node-pg-migrate";
+import database from "@/infra/database";
+import user, { type CreateUserResponse } from "@/models/user";
+import session from "@/models/session";
+import transaction from "@/models/transaction";
+import { TransactionRequest } from "@/schemas/transaction";
 
 const dropSchema = async (): Promise<void> => {
-  await database.query('DROP SCHEMA public CASCADE');
-  await database.query('CREATE SCHEMA public');
+  await database.query("DROP SCHEMA public CASCADE");
+  await database.query("CREATE SCHEMA public");
 };
 
 const runMigrations = async (): Promise<void> => {
@@ -14,9 +17,9 @@ const runMigrations = async (): Promise<void> => {
   try {
     await runner({
       dbClient: client,
-      dir: path.resolve(process.cwd(), 'migrations'),
-      direction: 'up',
-      migrationsTable: 'pgmigrations',
+      dir: path.resolve(process.cwd(), "migrations"),
+      direction: "up",
+      migrationsTable: "pgmigrations",
     });
   } finally {
     client.release();
@@ -44,6 +47,38 @@ const createUser = async (
   return { ...created, password: data.password };
 };
 
-const orchestrator = { dropSchema, runMigrations, resetDatabase, createUser };
+const createSession = async (user_id: string) => {
+  const createdSession = await session.createSession({
+    user_id: user_id,
+    user_agent: "",
+  });
+  if (!createdSession) throw new Error("Test Error: Session not created!");
+  return createdSession;
+};
+
+const createTransaction = async (
+  overrides: Partial<TransactionRequest> = {},
+) => {
+  const createdTransaction = await transaction.createOne({
+    user_id: overrides.user_id ?? "",
+    amount_cents:
+      overrides.amount_cents ?? +faker.finance.amount({ min: 10, dec: 0 }),
+    description:
+      overrides.description ?? faker.finance.transactionDescription(),
+    category: overrides.category ?? faker.finance.transactionType(),
+    occurred_at: overrides.occurred_at ?? new Date(),
+  });
+
+  return createdTransaction;
+};
+
+const orchestrator = {
+  dropSchema,
+  runMigrations,
+  resetDatabase,
+  createUser,
+  createSession,
+  createTransaction,
+};
 
 export default orchestrator;

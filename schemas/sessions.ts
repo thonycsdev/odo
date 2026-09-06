@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const SessionSchema = z.object({
   id: z.uuid(),
@@ -13,7 +13,7 @@ export type Session = z.infer<typeof SessionSchema>;
 
 export const SessionLoginSchema = z.object({
   email: z.email(),
-  password: z.string('must have a valid password').max(72).min(8),
+  password: z.string("must have a valid password").max(72).min(8),
 });
 
 export const SessionResponseSchema = z.object({
