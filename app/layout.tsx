@@ -32,6 +32,6 @@ export default function RootLayout({
           <Toaster />
         </Provider>
       </body>
-    </html >
+    </html>
   );
 }

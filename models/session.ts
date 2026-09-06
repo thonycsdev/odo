@@ -1,20 +1,20 @@
-import crypto from "node:crypto";
-import type { NextRequest } from "next/server";
-import database from "@/infra/database";
+import crypto from 'node:crypto';
+import type { NextRequest } from 'next/server';
+import database from '@/infra/database';
 import {
   DatabaseError,
   InvalidCredentialsError,
   NotFoundError,
-} from "@/infra/error-handler";
+} from '@/infra/error-handler';
 import {
   type Session,
   SessionLoginSchema,
   type SessionResponse,
   SessionSchema,
-} from "@/schemas/sessions";
-import auth from "./auth";
-import user from "./user";
-import { User } from "@/schemas/users";
+} from '@/schemas/sessions';
+import type { User } from '@/schemas/users';
+import auth from './auth';
+import user from './user';
 
 const SESSION_TTL_MS = 60 * 60 * 24 * 30 * 1000; // 30 days
 const TWO_DAYS_MS = 60 * 60 * 24 * 2 * 1000; // 2 days
@@ -34,7 +34,7 @@ const checkCredentials = async (data: unknown): Promise<SessionResponse> => {
   });
 
   if (!sessionInfo)
-    throw new DatabaseError("Error while creating a new session");
+    throw new DatabaseError('Error while creating a new session');
 
   const response: SessionResponse = {
     user_id: sessionInfo.user_id,
@@ -52,7 +52,7 @@ const createSession = async (
   const token = createCookieToken();
   const token_hash = auth.hashToken(token);
   const rows = await database.query<{ [key: string]: unknown }>(
-    "INSERT INTO sessions (token_hash, user_agent, user_id, expires_at) VALUES ($1, $2, $3, $4) RETURNING *",
+    'INSERT INTO sessions (token_hash, user_agent, user_id, expires_at) VALUES ($1, $2, $3, $4) RETURNING *',
     [token_hash, sessionData.user_agent, sessionData.user_id, expirationDate],
   );
   const row = rows[0];
@@ -65,7 +65,7 @@ const getSessionByCookieId = async (
   cookieHashedToken: string,
 ): Promise<Session | null> => {
   const rows = await database.query<{ [key: string]: unknown }>(
-    "SELECT * FROM sessions WHERE token_hash = $1",
+    'SELECT * FROM sessions WHERE token_hash = $1',
     [cookieHashedToken],
   );
   const row = rows[0];
@@ -78,7 +78,7 @@ const updateSessionExpiration = async (
   expiresAt: Date,
 ): Promise<Session | null> => {
   const rows = await database.query(
-    "UPDATE sessions SET expires_at = $1 WHERE id = $2 RETURNING *",
+    'UPDATE sessions SET expires_at = $1 WHERE id = $2 RETURNING *',
     [expiresAt, sessionId],
   );
   const row = rows[0];
@@ -86,12 +86,12 @@ const updateSessionExpiration = async (
 };
 
 const createCookieToken = (): string => {
-  const token = crypto.randomBytes(48).toString("hex");
+  const token = crypto.randomBytes(48).toString('hex');
   return token;
 };
 
 const logoutUser = async (req: NextRequest): Promise<void> => {
-  const userCookie = req.cookies.get("session_token");
+  const userCookie = req.cookies.get('session_token');
   if (!userCookie) throw new NotFoundError();
 
   const tokenHash = auth.hashToken(userCookie.value);
@@ -104,15 +104,15 @@ const logoutUser = async (req: NextRequest): Promise<void> => {
     userSession.id,
     newExpirationDate,
   );
-  if (!result) throw new DatabaseError("Error to update session information");
+  if (!result) throw new DatabaseError('Error to update session information');
 };
 const getTokenOwner = async (token: string): Promise<User> => {
   const hash = await auth.hashToken(token);
   const session = await getSessionByCookieId(hash);
-  if (!session) throw new InvalidCredentialsError("Invalid Token Given");
+  if (!session) throw new InvalidCredentialsError('Invalid Token Given');
   const current_user = await user.getUserById(session.user_id);
   if (!current_user)
-    throw new InvalidCredentialsError("Invalid Token - User Not Identified");
+    throw new InvalidCredentialsError('Invalid Token - User Not Identified');
   return current_user;
 };
 
