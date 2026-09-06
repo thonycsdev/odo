@@ -1,3 +1,4 @@
+import { type NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import logger from '@/infra/logger';
 
@@ -70,7 +71,7 @@ export function fail(status: number, message: string): ApiResponse {
 export function handle(error: unknown): ApiResponse {
   if (error instanceof ZodError) {
     logger.info({ err: error }, error.name);
-    return fail(422, error.issues.at(0)?.message ?? 'Invalid Field');
+    return fail(422, error.issues.at(0)?.message ?? `Invalid Field`);
   }
   if (error instanceof AppError) {
     logger.error({ err: error }, error.name);
@@ -78,4 +79,22 @@ export function handle(error: unknown): ApiResponse {
   }
   logger.error({ err: error }, 'Unhandled application error');
   return fail(500, 'Internal server error');
+}
+
+export type RouterHandler<Context = unknown> = (
+  req: NextRequest,
+  context: Context,
+) => Promise<NextResponse>;
+
+export function withErrorHandling<Context>(
+  handler: RouterHandler<Context>,
+): RouterHandler<Context> {
+  return async (req, ctx) => {
+    try {
+      return await handler(req, ctx);
+    } catch (e) {
+      const data = handle(e);
+      return NextResponse.json(data, { status: data.status });
+    }
+  };
 }

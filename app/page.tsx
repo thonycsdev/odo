@@ -60,8 +60,8 @@ export default function Home(): React.JSX.Element {
                 Economize. Cresça. Conquiste.
               </EmptyState.Title>
               <EmptyState.Description maxW="lg" mx="auto" fontSize="lg">
-                Registre seus gastos, defina metas de economia e acompanhe
-                sua evolução financeira até a liberdade financeira.
+                Registre seus gastos, defina metas de economia e acompanhe sua
+                evolução financeira até a liberdade financeira.
               </EmptyState.Description>
             </Stack>
             <HStack gap="3">

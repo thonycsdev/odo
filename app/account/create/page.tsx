@@ -100,9 +100,7 @@ export default function Create(): React.JSX.Element {
             {error ? (
               <Field.ErrorText>{error}</Field.ErrorText>
             ) : (
-              <Field.HelperText>
-                Use pelo menos 8 caracteres.
-              </Field.HelperText>
+              <Field.HelperText>Use pelo menos 8 caracteres.</Field.HelperText>
             )}
           </Field.Root>
 

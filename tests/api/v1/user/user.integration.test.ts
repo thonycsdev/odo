@@ -23,7 +23,6 @@ const postUser = (body: CreateUserRequest): Promise<Response> =>
   });
 
 describe('POST /api/v1/user', () => {
-
   it('returns the correct fields and does not expose password_hash', async () => {
     const request = buildRequest();
     const res = await postUser(request);

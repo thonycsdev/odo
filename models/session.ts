@@ -12,6 +12,7 @@ import {
   type SessionResponse,
   SessionSchema,
 } from '@/schemas/sessions';
+import type { User } from '@/schemas/users';
 import auth from './auth';
 import user from './user';
 
@@ -27,13 +28,8 @@ const checkCredentials = async (data: unknown): Promise<SessionResponse> => {
     userInfo.password_hash,
   );
   if (!result) throw new InvalidCredentialsError();
-  const expirationDate = new Date(Date.now() + SESSION_TTL_MS);
-  const token = createCookieToken();
-  const token_hash = auth.hashToken(token);
   const sessionInfo = await createSession({
     user_id: userInfo.id,
-    token_hash,
-    expires_at: expirationDate,
     user_agent: null,
   });
 
@@ -42,7 +38,7 @@ const checkCredentials = async (data: unknown): Promise<SessionResponse> => {
 
   const response: SessionResponse = {
     user_id: sessionInfo.user_id,
-    token,
+    token: sessionInfo.token_hash,
     created_at: sessionInfo.created_at,
     expires_at: sessionInfo.expires_at,
   };
@@ -52,17 +48,17 @@ const checkCredentials = async (data: unknown): Promise<SessionResponse> => {
 const createSession = async (
   sessionData: Partial<Session>,
 ): Promise<Session | null> => {
+  const expirationDate = new Date(Date.now() + SESSION_TTL_MS);
+  const token = createCookieToken();
+  const token_hash = auth.hashToken(token);
   const rows = await database.query<{ [key: string]: unknown }>(
     'INSERT INTO sessions (token_hash, user_agent, user_id, expires_at) VALUES ($1, $2, $3, $4) RETURNING *',
-    [
-      sessionData.token_hash,
-      sessionData.user_agent,
-      sessionData.user_id,
-      sessionData.expires_at,
-    ],
+    [token_hash, sessionData.user_agent, sessionData.user_id, expirationDate],
   );
   const row = rows[0];
-  return row ? SessionSchema.parse(row) : null;
+  row.token_hash = token;
+  const result = SessionSchema.parse(row);
+  return result;
 };
 
 const getSessionByCookieId = async (
@@ -73,6 +69,7 @@ const getSessionByCookieId = async (
     [cookieHashedToken],
   );
   const row = rows[0];
+
   return row ? SessionSchema.parse(row) : null;
 };
 
@@ -109,17 +106,21 @@ const logoutUser = async (req: NextRequest): Promise<void> => {
   );
   if (!result) throw new DatabaseError('Error to update session information');
 };
-
-const checkCurrentSession = async (token: string) => {
-  const hash = auth.hashToken(token);
+const getTokenOwner = async (token: string): Promise<User> => {
+  const hash = await auth.hashToken(token);
   const session = await getSessionByCookieId(hash);
   if (!session) throw new InvalidCredentialsError('Invalid Token Given');
   const current_user = await user.getUserById(session.user_id);
   if (!current_user)
     throw new InvalidCredentialsError('Invalid Token - User Not Identified');
-  return current_user.email;
+  return current_user;
 };
 
-const session = { checkCredentials, logoutUser, checkCurrentSession };
+const session = {
+  checkCredentials,
+  logoutUser,
+  createSession,
+  getTokenOwner,
+};
 
 export default session;

@@ -2,7 +2,10 @@ import path from 'node:path';
 import { faker } from '@faker-js/faker';
 import { runner } from 'node-pg-migrate';
 import database from '@/infra/database';
+import session from '@/models/session';
+import transaction from '@/models/transaction';
 import user, { type CreateUserResponse } from '@/models/user';
+import type { TransactionRequest } from '@/schemas/transaction';
 
 const dropSchema = async (): Promise<void> => {
   await database.query('DROP SCHEMA public CASCADE');
@@ -44,6 +47,38 @@ const createUser = async (
   return { ...created, password: data.password };
 };
 
-const orchestrator = { dropSchema, runMigrations, resetDatabase, createUser };
+const createSession = async (user_id: string) => {
+  const createdSession = await session.createSession({
+    user_id: user_id,
+    user_agent: '',
+  });
+  if (!createdSession) throw new Error('Test Error: Session not created!');
+  return createdSession;
+};
+
+const createTransaction = async (
+  overrides: Partial<TransactionRequest> = {},
+) => {
+  const createdTransaction = await transaction.createOne({
+    user_id: overrides.user_id ?? '',
+    amount_cents:
+      overrides.amount_cents ?? +faker.finance.amount({ min: 10, dec: 0 }),
+    description:
+      overrides.description ?? faker.finance.transactionDescription(),
+    category: overrides.category ?? faker.finance.transactionType(),
+    occurred_at: overrides.occurred_at ?? new Date(),
+  });
+
+  return createdTransaction;
+};
+
+const orchestrator = {
+  dropSchema,
+  runMigrations,
+  resetDatabase,
+  createUser,
+  createSession,
+  createTransaction,
+};
 
 export default orchestrator;
