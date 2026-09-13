@@ -2,9 +2,11 @@ import path from 'node:path';
 import { faker } from '@faker-js/faker';
 import { runner } from 'node-pg-migrate';
 import database from '@/infra/database';
+import { category } from '@/models/category';
 import session from '@/models/session';
 import transaction from '@/models/transaction';
 import user, { type CreateUserResponse } from '@/models/user';
+import type { CategoryCreateRequest } from '@/schemas/category';
 import type { TransactionRequest } from '@/schemas/transaction';
 
 const dropSchema = async (): Promise<void> => {
@@ -72,6 +74,18 @@ const createTransaction = async (
   return createdTransaction;
 };
 
+const createCategory = async (
+  user_id: string,
+  overrides: Partial<CategoryCreateRequest> = {},
+) => {
+  const createdTransaction = await category.createOne({
+    user_id,
+    name: overrides.name ?? faker.finance.transactionType(),
+  });
+
+  return createdTransaction;
+};
+
 const orchestrator = {
   dropSchema,
   runMigrations,
@@ -79,6 +93,7 @@ const orchestrator = {
   createUser,
   createSession,
   createTransaction,
+  createCategory,
 };
 
 export default orchestrator;
