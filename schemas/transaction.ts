@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const TransactionSchema = z.object({
   id: z.uuid(),
   user_id: z.uuid().nonoptional(),
+  type: z.enum(['income', 'expense']),
   amount_cents: z
     .number()
     .positive('O valor não pode ser menor ou igual a zero.'),
@@ -18,6 +19,7 @@ export const TransactionRequestSchema = z.object({
   amount_cents: z
     .number()
     .positive('O valor não pode ser menor ou igual a zero.'),
+  type: z.enum(['income', 'expense']),
   description: z.string().max(255),
   category: z.string().max(255),
   occurred_at: z.coerce.date(),
@@ -34,6 +36,7 @@ export const TransactionCreateRequestSchema = TransactionRequestSchema.omit({
 export const TransactionResponseSchema = z.object({
   id: z.uuid(),
   user_id: z.uuid().nonoptional(),
+  type: z.enum(['income', 'expense']),
   amount_cents: z.number().nonnegative(),
   description: z.string().max(255),
   category: z.string().max(255),

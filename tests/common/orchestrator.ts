@@ -68,6 +68,7 @@ const createTransaction = async (
     description:
       overrides.description ?? faker.finance.transactionDescription(),
     category: overrides.category ?? faker.finance.transactionType(),
+    type: overrides.type ?? 'expense',
     occurred_at: overrides.occurred_at ?? new Date(),
   });
 

@@ -20,15 +20,16 @@ const insertOneTransaction = async (
   const result = await database.query(
     `INSERT INTO 
         transactions 
-        (user_id,amount_cents,description,category, occurred_at) 
+        (user_id,amount_cents,description,category,type,occurred_at) 
     VALUES 
-        ($1,$2,$3,$4,$5) 
+        ($1,$2,$3,$4,$5,$6) 
     RETURNING *;`,
     [
       data.user_id,
       data.amount_cents,
       data.description,
       data.category,
+      data.type,
       data.occurred_at,
     ],
   );

@@ -9,6 +9,7 @@ describe('POST /api/v1/transactions', () => {
     const transaction: TransactionRequest = {
       user_id: createdUser.id,
       amount_cents: +faker.finance.amount({ min: 10, max: 10000, dec: 0 }),
+      type: 'income',
       description: faker.finance.transactionDescription(),
       category: faker.finance.transactionType(),
       occurred_at: faker.date.recent(),
@@ -28,6 +29,7 @@ describe('POST /api/v1/transactions', () => {
       id: expect.any(String),
       user_id: transaction.user_id,
       amount_cents: transaction.amount_cents,
+      type: transaction.type,
       description: transaction.description,
       category: transaction.category,
       occurred_at: transaction.occurred_at.toISOString(),
@@ -39,6 +41,7 @@ describe('POST /api/v1/transactions', () => {
     const transaction: TransactionRequest = {
       user_id: createdUser.id,
       amount_cents: +faker.finance.amount({ max: -1, min: -100, dec: 0 }),
+      type: 'expense',
       description: faker.finance.transactionDescription(),
       category: faker.finance.transactionType(),
       occurred_at: new Date(),
@@ -68,6 +71,7 @@ describe('GET /api/v1/transactions', () => {
     const createdSession = await orchestrator.createSession(createdUser.id);
     const transaction1: TransactionRequest = {
       user_id: createdUser.id,
+      type: 'expense',
       amount_cents: +faker.finance.amount({ max: 100, min: 1, dec: 0 }),
       description: faker.finance.transactionDescription(),
       category: faker.finance.transactionType(),
@@ -76,6 +80,7 @@ describe('GET /api/v1/transactions', () => {
     await orchestrator.createTransaction(transaction1);
     const transaction2: TransactionRequest = {
       user_id: createdUser2.id,
+      type: 'income',
       amount_cents: +faker.finance.amount({ max: 100, min: 1, dec: 0 }),
       description: faker.finance.transactionDescription(),
       category: faker.finance.transactionType(),
@@ -104,6 +109,7 @@ describe('GET /api/v1/transactions/[id]', () => {
     const createdSession = await orchestrator.createSession(createdUser.id);
     const transaction: TransactionRequest = {
       user_id: createdUser.id,
+      type: 'income',
       amount_cents: +faker.finance.amount({ max: 100, min: 1, dec: 0 }),
       description: faker.finance.transactionDescription(),
       category: faker.finance.transactionType(),
@@ -153,6 +159,7 @@ describe('GET /api/v1/transactions/[id]', () => {
     const createdUser = await orchestrator.createUser();
     const transaction: TransactionRequest = {
       user_id: createdUser.id,
+      type: 'income',
       amount_cents: +faker.finance.amount({ max: 100, min: 1, dec: 0 }),
       description: faker.finance.transactionDescription(),
       category: faker.finance.transactionType(),
@@ -185,6 +192,7 @@ describe('PATCH /api/v1/transactions/[id]', () => {
     const createdSession = await orchestrator.createSession(createdUser.id);
     const transaction: TransactionRequest = {
       user_id: createdUser.id,
+      type: 'income',
       amount_cents: +faker.finance.amount({ max: 100, min: 1, dec: 0 }),
       description: faker.finance.transactionDescription(),
       category: faker.finance.transactionType(),
@@ -220,6 +228,7 @@ describe('PATCH /api/v1/transactions/[id]', () => {
   test('returns 404 when the transaction belongs to another user', async () => {
     const createdUser = await orchestrator.createUser();
     const transaction: TransactionRequest = {
+      type: 'income',
       user_id: createdUser.id,
       amount_cents: +faker.finance.amount({ max: 100, min: 1, dec: 0 }),
       description: faker.finance.transactionDescription(),
@@ -256,6 +265,7 @@ describe('DELETE /api/v1/transactions/[id]', () => {
     const createdSession = await orchestrator.createSession(createdUser.id);
     const transaction: TransactionRequest = {
       user_id: createdUser.id,
+      type: 'income',
       amount_cents: +faker.finance.amount({ max: 100, min: 1, dec: 0 }),
       description: faker.finance.transactionDescription(),
       category: faker.finance.transactionType(),
@@ -291,6 +301,7 @@ describe('DELETE /api/v1/transactions/[id]', () => {
     const createdUser = await orchestrator.createUser();
     const transaction: TransactionRequest = {
       user_id: createdUser.id,
+      type: 'income',
       amount_cents: +faker.finance.amount({ max: 100, min: 1, dec: 0 }),
       description: faker.finance.transactionDescription(),
       category: faker.finance.transactionType(),
