@@ -5,6 +5,10 @@ import {
 } from '@/schemas/category';
 import orchestrator from '@/tests/common/orchestrator';
 
+beforeAll(async () => {
+  await orchestrator.resetDatabase();
+});
+
 describe('POST /api/v1/category', () => {
   test('creates a category for the logged-in user', async () => {
     const createdUser = await orchestrator.createUser();

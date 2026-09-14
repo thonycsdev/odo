@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { category } from '@/models/category';
+import { CategoryResponseSchema, CategorySchema } from './category';
 
 export const TransactionSchema = z.object({
   id: z.uuid(),
@@ -8,7 +10,7 @@ export const TransactionSchema = z.object({
     .number()
     .positive('O valor não pode ser menor ou igual a zero.'),
   description: z.string().max(255),
-  category: z.string().max(255),
+  category: CategorySchema,
   occurred_at: z.coerce.date(),
   created_at: z.coerce.date(),
   updated_at: z.coerce.date(),
@@ -21,7 +23,7 @@ export const TransactionRequestSchema = z.object({
     .positive('O valor não pode ser menor ou igual a zero.'),
   type: z.enum(['income', 'expense']),
   description: z.string().max(255),
-  category: z.string().max(255),
+  category_id: z.uuid().nonoptional(),
   occurred_at: z.coerce.date(),
 });
 
@@ -39,7 +41,8 @@ export const TransactionResponseSchema = z.object({
   type: z.enum(['income', 'expense']),
   amount_cents: z.number().nonnegative(),
   description: z.string().max(255),
-  category: z.string().max(255),
+  category_id: z.uuid().nonoptional(),
+  category: CategoryResponseSchema,
   occurred_at: z.coerce.date(),
 });
 
